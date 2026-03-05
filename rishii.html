@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Advanced AI Chat</title>
+
+<style>
+
+*{
+box-sizing:border-box;
+margin:0;
+padding:0;
+font-family:system-ui;
+}
+
+body{
+height:100vh;
+display:flex;
+background:#343541;
+color:white;
+}
+
+/* SIDEBAR */
+
+.sidebar{
+width:260px;
+background:#202123;
+display:flex;
+flex-direction:column;
+padding:10px;
+}
+
+.logo{
+font-size:22px;
+font-weight:bold;
+margin-bottom:10px;
+text-align:center;
+}
+
+.new-chat{
+background:#2a2b32;
+padding:10px;
+border-radius:6px;
+text-align:center;
+cursor:pointer;
+margin-bottom:10px;
+}
+
+.chat-history{
+flex:1;
+overflow:auto;
+}
+
+.chat-item{
+padding:8px;
+border-radius:6px;
+margin-bottom:5px;
+cursor:pointer;
+}
+
+.chat-item:hover{
+background:#2a2b32;
+}
+
+/* CHAT AREA */
+
+.chat-container{
+flex:1;
+display:flex;
+flex-direction:column;
+}
+
+.messages{
+flex:1;
+overflow-y:auto;
+padding:25px;
+display:flex;
+flex-direction:column;
+gap:15px;
+}
+
+.message{
+max-width:700px;
+padding:12px 16px;
+border-radius:8px;
+line-height:1.5;
+}
+
+.user{
+align-self:flex-end;
+background:#444654;
+}
+
+.bot{
+align-self:flex-start;
+background:#3e3f4b;
+}
+
+/* INPUT */
+
+.input-area{
+display:flex;
+padding:15px;
+background:#40414f;
+gap:10px;
+}
+
+textarea{
+flex:1;
+resize:none;
+height:45px;
+border-radius:6px;
+border:none;
+padding:10px;
+font-size:15px;
+}
+
+button{
+background:#19c37d;
+border:none;
+padding:12px 20px;
+border-radius:6px;
+color:white;
+cursor:pointer;
+font-size:15px;
+}
+
+/* LOADING DOTS */
+
+.loading span{
+animation:blink 1.4s infinite both;
+}
+
+.loading span:nth-child(2){
+animation-delay:.2s;
+}
+
+.loading span:nth-child(3){
+animation-delay:.4s;
+}
+
+@keyframes blink{
+0%{opacity:.2}
+20%{opacity:1}
+100%{opacity:.2}
+}
+
+</style>
+</head>
+
+<body>
+
+<!-- SIDEBAR -->
+
+<div class="sidebar">
+
+<div class="logo">AI Chat</div>
+
+<div class="new-chat" onclick="newChat()">+ New Chat</div>
+
+<div class="chat-history" id="history"></div>
+
+</div>
+
+<!-- CHAT -->
+
+<div class="chat-container">
+
+<div class="messages" id="messages"></div>
+
+<div class="input-area">
+
+<textarea id="input" placeholder="Send a message..."></textarea>
+
+<button onclick="sendMessage()">Send</button>
+
+</div>
+
+</div>
+
+<script>
+
+let chats=[]
+let currentChat=[]
+
+const messages=document.getElementById("messages")
+
+function sendMessage(){
+
+let input=document.getElementById("input")
+let text=input.value.trim()
+
+if(!text)return
+
+addMessage(text,"user")
+
+currentChat.push({role:"user",content:text})
+
+input.value=""
+
+showLoading()
+
+fakeAI(text)
+
+}
+
+function addMessage(text,type){
+
+let msg=document.createElement("div")
+
+msg.className="message "+type
+
+msg.innerHTML=formatText(text)
+
+messages.appendChild(msg)
+
+messages.scrollTop=messages.scrollHeight
+
+}
+
+function formatText(text){
+
+text=text.replace(/`(.*?)`/g,"<code>$1</code>")
+text=text.replace(/\*\*(.*?)\*\*/g,"<b>$1</b>")
+
+return text
+
+}
+
+function showLoading(){
+
+let loading=document.createElement("div")
+
+loading.className="message bot loading"
+
+loading.id="loading"
+
+loading.innerHTML="<span>.</span><span>.</span><span>.</span>"
+
+messages.appendChild(loading)
+
+messages.scrollTop=messages.scrollHeight
+
+}
+
+function removeLoading(){
+
+let loading=document.getElementById("loading")
+
+if(loading)loading.remove()
+
+}
+
+function fakeAI(prompt){
+
+setTimeout(()=>{
+
+removeLoading()
+
+let reply="AI response to: "+prompt
+
+addMessage(reply,"bot")
+
+currentChat.push({role:"assistant",content:reply})
+
+},1200)
+
+}
+
+function newChat(){
+
+if(currentChat.length>0){
+
+chats.push(currentChat)
+
+addHistory("Chat "+chats.length)
+
+}
+
+currentChat=[]
+
+messages.innerHTML=""
+
+}
+
+function addHistory(title){
+
+let item=document.createElement("div")
+
+item.className="chat-item"
+
+item.innerText=title
+
+document.getElementById("history").appendChild(item)
+
+}
+
+document.getElementById("input").addEventListener("keydown",function(e){
+
+if(e.key==="Enter" && !e.shiftKey){
+
+e.preventDefault()
+
+sendMessage()
+
+}
+
+})
+
+</script>
+
+</body>
+</html>
